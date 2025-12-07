@@ -6,76 +6,154 @@
 <style>
     body {
         font-family: Arial, sans-serif;
-        background: #111;
-        color: white;
+        background: #0b0f1a;
+        color: #e6f0ff;
         text-align: center;
-        padding: 20px;
+        padding: 30px;
     }
+
+    h1 {
+        font-size: 50px;
+        margin-bottom: 20px;
+        color: #78a7ff;
+        letter-spacing: 2px;
+    }
+
     .scoreboard {
         display: flex;
         justify-content: center;
-        gap: 40px;
+        gap: 60px;
         margin-top: 20px;
+        flex-wrap: wrap;
     }
+
     .team {
-        background: #222;
-        padding: 20px;
-        border-radius: 10px;
-        width: 250px;
+        background: #101825;
+        border: 2px solid #3459b8;
+        padding: 30px;
+        border-radius: 20px;
+        width: 300px;
+        box-shadow: 0 0 25px rgba(80,120,255,0.25);
     }
+
+    .team h2 {
+        font-size: 32px;
+        color: #9dbaff;
+        margin-bottom: 15px;
+    }
+
+    .score {
+        font-size: 90px;
+        font-weight: bold;
+        margin: 20px 0;
+        color: #e6f0ff;
+    }
+
     button {
-        padding: 10px 20px;
-        margin: 5px;
+        padding: 14px 28px;
+        margin: 8px;
         border: none;
-        border-radius: 8px;
-        font-size: 16px;
+        border-radius: 10px;
+        font-size: 20px;
         cursor: pointer;
+        font-weight: bold;
     }
+
+    .add {
+        background: #3d6bff;
+        color: white;
+    }
+
+    .undo {
+        background: #1a2740;
+        color: #9dbaff;
+        border: 1px solid #3459b8;
+    }
+
+    .reset {
+        background: #142033;
+        color: #ff8080;
+        border: 1px solid #923737;
+    }
+
     .timer {
-        font-size: 60px;
-        margin-top: 30px;
+        font-size: 90px;
+        margin-top: 40px;
+        color: #78a7ff;
+        font-weight: bold;
     }
+
+    .timer-buttons button {
+        background: #3d6bff;
+        color: white;
+        margin: 10px;
+        border-radius: 12px;
+    }
+
 </style>
 </head>
 <body>
 
-<h1>EVHS NSB Scoreboard</h1>
+<h1>EVHS National Science Bowl Scoreboard</h1>
 
 <div class="scoreboard">
+
+    <!-- TEAM A -->
     <div class="team">
         <h2>Team A</h2>
-        <h1 id="scoreA">0</h1>
-        <button onclick="addPoints('A',4)">+4</button>
-        <button onclick="addPoints('A',10)">+10</button>
-        <button onclick="resetTeam('A')">Reset A</button>
+        <div class="score" id="scoreA">0</div>
+        <button class="add" onclick="addPoints('A',4)">+4</button>
+        <button class="add" onclick="addPoints('A',10)">+10</button>
+        <button class="undo" onclick="undo('A')">Undo</button>
+        <button class="reset" onclick="resetTeam('A')">Reset</button>
     </div>
 
+    <!-- TEAM B -->
     <div class="team">
         <h2>Team B</h2>
-        <h1 id="scoreB">0</h1>
-        <button onclick="addPoints('B',4)">+4</button>
-        <button onclick="addPoints('B',10)">+10</button>
-        <button onclick="resetTeam('B')">Reset B</button>
+        <div class="score" id="scoreB">0</div>
+        <button class="add" onclick="addPoints('B',4)">+4</button>
+        <button class="add" onclick="addPoints('B',10)">+10</button>
+        <button class="undo" onclick="undo('B')">Undo</button>
+        <button class="reset" onclick="resetTeam('B')">Reset</button>
     </div>
+
 </div>
 
-<h2 class="timer" id="timer">0</h2>
+<div class="timer" id="timer">0</div>
 
-<button onclick="startFive()">Start 5 sec</button>
-<button onclick="startTwenty()">Start 20 sec</button>
-<button onclick="stopTimer()">Stop</button>
+<div class="timer-buttons">
+    <button onclick="startFive()">Start 5 sec</button>
+    <button onclick="startTwenty()">Start 20 sec</button>
+    <button class="reset" onclick="stopTimer()">Stop Timer</button>
+</div>
 
 <script>
 let scoreA = 0;
 let scoreB = 0;
+
+let history = { A: [], B: [] };
 let timerInterval = null;
 
 function addPoints(team, points) {
     if (team === 'A') {
+        history.A.push(scoreA);
         scoreA += points;
         document.getElementById("scoreA").innerText = scoreA;
     } else {
+        history.B.push(scoreB);
         scoreB += points;
+        document.getElementById("scoreB").innerText = scoreB;
+    }
+}
+
+function undo(team) {
+    if (team === 'A' && history.A.length > 0) {
+        scoreA = history.A.pop();
+        document.getElementById("scoreA").innerText = scoreA;
+    }
+    if (team === 'B' && history.B.length > 0) {
+        scoreB = history.B.pop();
         document.getElementById("scoreB").innerText = scoreB;
     }
 }
@@ -83,9 +161,11 @@ function addPoints(team, points) {
 function resetTeam(team) {
     if (team === 'A') {
         scoreA = 0;
+        history.A = [];
         document.getElementById("scoreA").innerText = 0;
     } else {
         scoreB = 0;
+        history.B = [];
         document.getElementById("scoreB").innerText = 0;
     }
 }
@@ -117,10 +197,7 @@ function startFive() {
 
 function startTwenty() {
     stopTimer();
-
-    // First phase: 15–0
     runCountdown(15, () => {
-        // Second phase: 5–0
         runCountdown(5);
     });
 }
